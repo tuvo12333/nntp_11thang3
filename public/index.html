@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User/Role Admin</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: rgba(255, 255, 255, 0.06);
+        --panel2: rgba(255, 255, 255, 0.09);
+        --text: #e8ecff;
+        --muted: rgba(232, 236, 255, 0.75);
+        --border: rgba(255, 255, 255, 0.12);
+        --brand: #7c5cff;
+        --danger: #ff4d6d;
+        --ok: #19d3a2;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans",
+          sans-serif;
+        color: var(--text);
+        background: radial-gradient(900px 500px at 20% 10%, rgba(124, 92, 255, 0.25), transparent 55%),
+          radial-gradient(800px 480px at 80% 0%, rgba(25, 211, 162, 0.18), transparent 52%),
+          radial-gradient(900px 560px at 60% 90%, rgba(255, 77, 109, 0.10), transparent 55%),
+          var(--bg);
+        min-height: 100vh;
+      }
+      .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 18px 60px; }
+      header { display:flex; gap:12px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+      h1 { font-size: 22px; margin: 0; letter-spacing: .2px; }
+      .sub { color: var(--muted); font-size: 13px; }
+      .pill {
+        display:inline-flex; gap:8px; align-items:center;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 10px 12px;
+        border-radius: 12px;
+      }
+      .pill input {
+        width: 320px;
+        max-width: 66vw;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-size: 13px;
+      }
+      .pill button {
+        background: linear-gradient(135deg, var(--brand), rgba(124, 92, 255, 0.75));
+        border: 1px solid rgba(255,255,255,.18);
+        color: white;
+        padding: 9px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 12px;
+      }
+      .grid {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        overflow: hidden;
+      }
+      .card h2 { margin: 0 0 10px; font-size: 15px; color: rgba(232,236,255,.92); }
+      .row { display:flex; gap:10px; flex-wrap: wrap; align-items: end; }
+      label { display:flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); }
+      input, select, textarea {
+        background: var(--panel2);
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 12px;
+        padding: 10px 12px;
+        color: var(--text);
+        outline: none;
+        font-size: 13px;
+        min-width: 240px;
+      }
+      textarea { min-height: 86px; resize: vertical; }
+      .actions { display:flex; gap:10px; flex-wrap: wrap; margin-top: 10px; }
+      .btn {
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.16);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .btn.primary { background: linear-gradient(135deg, var(--brand), rgba(124, 92, 255, 0.65)); }
+      .btn.danger { background: rgba(255, 77, 109, .12); border-color: rgba(255, 77, 109, .35); }
+      .btn.ok { background: rgba(25, 211, 162, .12); border-color: rgba(25, 211, 162, .35); }
+      .list { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+      table { width:100%; border-collapse: collapse; font-size: 13px; }
+      th, td { text-align:left; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; }
+      th { color: rgba(232,236,255,.85); font-weight: 800; font-size: 12px; }
+      .muted { color: var(--muted); font-size: 12px; }
+      .tag { display:inline-flex; padding: 3px 8px; border-radius: 999px; font-size: 11px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); }
+      .tag.ok { border-color: rgba(25, 211, 162, .45); background: rgba(25, 211, 162, .12); }
+      .tag.off { border-color: rgba(255, 77, 109, .45); background: rgba(255, 77, 109, .12); }
+      pre {
+        margin: 10px 0 0;
+        white-space: pre-wrap;
+        background: rgba(0,0,0,.25);
+        border: 1px solid rgba(255,255,255,.12);
+        padding: 10px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        color: rgba(232,236,255,.9);
+      }
+      .right { text-align:right; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>User/Role Admin (In-memory)</h1>
+          <div class="sub">Tạo role/user, enable/disable, xoá mềm, và xem users theo role.</div>
+        </div>
+        <div class="pill" title="Base URL của API">
+          <span class="sub">API</span>
+          <input id="baseUrl" value="" placeholder="http://localhost:3001" />
+          <button id="btnUseCurrent">Dùng URL hiện tại</button>
+        </div>
+      </header>
+
+      <div class="grid">
+        <section class="card">
+          <h2>Role</h2>
+          <div class="row">
+            <label>
+              Name (unique)
+              <input id="roleName" placeholder="admin" />
+            </label>
+            <label style="flex:1; min-width: 280px;">
+              Description
+              <input id="roleDesc" placeholder="Administrator" />
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="btnCreateRole">Create role</button>
+            <button class="btn" id="btnReloadRoles">Reload roles</button>
+          </div>
+          <div class="list">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Name</th><th>Description</th><th class="right">Action</th></tr>
+              </thead>
+              <tbody id="rolesTbody"></tbody>
+            </table>
+            <div class="muted">Tip: xoá mềm role sẽ không xoá user, nhưng role đó sẽ không còn attach vào user nữa.</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>User</h2>
+          <div class="row">
+            <label>
+              Username (unique)
+              <input id="userUsername" placeholder="kiet" />
+            </label>
+            <label>
+              Email (unique)
+              <input id="userEmail" placeholder="kiet@gmail.com" />
+            </label>
+            <label>
+              Password
+              <input id="userPassword" placeholder="123" />
+            </label>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <label style="flex:1; min-width: 260px;">
+              Full name
+              <input id="userFullName" placeholder="Lai Ngoc Trung Kiet" />
+            </label>
+            <label style="flex:1; min-width: 260px;">
+              Avatar URL
+              <input id="userAvatar" placeholder="https://i.sstatic.net/l60Hf.png" />
+            </label>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <label>
+              Role
+              <select id="userRoleId">
+                <option value="">(none)</option>
+              </select>
+            </label>
+            <label>
+              Login count (min 0)
+              <input id="userLoginCount" value="0" />
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="btnCreateUser">Create user</button>
+            <button class="btn" id="btnReloadUsers">Reload users</button>
+          </div>
+          <div class="list">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th><th>User</th><th>Email</th><th>Role</th><th>Status</th><th class="right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="usersTbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Enable / Disable (email + username)</h2>
+          <div class="row">
+            <label>
+              Email
+              <input id="toggleEmail" placeholder="kiet@gmail.com" />
+            </label>
+            <label>
+              Username
+              <input id="toggleUsername" placeholder="kiet" />
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn ok" id="btnEnable">Enable</button>
+            <button class="btn danger" id="btnDisable">Disable</button>
+          </div>
+          <div class="muted">Khi đúng thông tin, API sẽ cập nhật `status`.</div>
+        </section>
+
+        <section class="card">
+          <h2>Users theo role: <span class="muted">GET /roles/:id/users</span></h2>
+          <div class="row">
+            <label>
+              Role ID
+              <input id="roleIdQuery" placeholder="1" />
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="btnQueryUsersByRole">Get users</button>
+          </div>
+          <pre id="usersByRoleOut">...</pre>
+        </section>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
+
+
